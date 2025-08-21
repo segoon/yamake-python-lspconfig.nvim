@@ -25,17 +25,21 @@ local function array_equal(a, b)
   return true
 end
 
-local function setup_lsp(pyright_config)
-  local file = io.open(pyright_config)
+local function read_file(filename)
+  local file = io.open(filename)
   if not file then
-    return
+    return nil
   end
   local content = file:read('a')
   file:close()
+  return content
+end
 
+local function setup_lsp(pyright_config)
   -- https://github.com/microsoft/pyright/blob/main/docs/configuration.md
   -- extraPaths [array of strings, optional]: Additional search paths that
   -- will be used when searching for modules imported by files.
+  local content = read_file(pyright_config)
   local json = vim.fn.json_decode(content)
   local extra_paths = json['extraPaths']
   if extra_paths == nil then
@@ -128,6 +132,7 @@ local function on_attach(_)
     setup_lsp(pyright_config)
     return
   else
+    -- TODO: config: autogenerate and don't ask
     vim.ui.input(
       {
 	prompt = 'Generate "pyrightconfig.json" for ' .. yamake_module .. '? [Y/n]',
