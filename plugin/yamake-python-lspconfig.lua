@@ -96,6 +96,7 @@ local function generate_project(yamake_module, callback)
 
     -- TODO: signal
 
+    -- TODO: config: allow storing pyrightconfig.json in plugin's directory
     local pyright_config = yamake_module .. '/pyrightconfig.json'
     vim.schedule(
       function()
@@ -104,6 +105,7 @@ local function generate_project(yamake_module, callback)
     )
   end
 
+  -- TODO: generate in a unique subdirectory of plugin's directory
   vim.system(
     {'ya', 'ide', 'vscode', '--py3', '-P', '~/ide'},
     {
