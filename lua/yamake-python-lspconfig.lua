@@ -1,5 +1,6 @@
 local vim = vim
 
+local plugin_args = {}
 local wait_restart_clients = {}
 
 local function locate_pyright_config_json(yamake_module)
@@ -57,6 +58,10 @@ local function setup_lsp(pyright_config)
       end
       if workspace and array_equal(workspace['extraPaths'], extra_paths) then
 	-- OK, we've already restarted the client with the fixed config
+	goto continue
+      end
+
+      if not plugin_args.autorestart_lsp then
 	goto continue
       end
 
@@ -132,7 +137,16 @@ local function on_attach(_)
     setup_lsp(pyright_config)
     return
   else
-    -- TODO: config: autogenerate and don't ask
+    if plugin_args.autogenerate_config then
+      generate_project(
+	yamake_module,
+	function(created_pyright_config)
+	  setup_lsp(created_pyright_config)
+	end
+      )
+      return
+    end
+
     vim.ui.input(
       {
 	prompt = 'Generate "pyrightconfig.json" for ' .. yamake_module .. '? [Y/n]',
@@ -177,7 +191,15 @@ end
 
 local M = {}
 
-function M.setup()
+function M.setup(args)
+  plugin_args = vim.deepcopy(args)
+  if plugin_args.autorestart_lsp == nil then
+    plugin_args.autorestart_lsp = true
+  end
+  if plugin_args.autogenerate_config == nil then
+    plugin_args.autogenerate_config = false
+  end
+
   vim.api.nvim_create_autocmd({'LspAttach'}, {
     pattern = '*.py',
     callback = on_attach
