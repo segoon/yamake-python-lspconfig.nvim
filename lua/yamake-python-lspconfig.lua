@@ -174,12 +174,19 @@ local function on_detach(args)
   end
 end
 
-vim.api.nvim_create_autocmd({'LspAttach'}, {
-  pattern = '*.py',
-  callback = on_attach
-})
 
-vim.api.nvim_create_autocmd({'LspDetach'}, {
-  pattern = '*.py',
-  callback = on_detach
-})
+local M = {}
+
+function M.setup()
+  vim.api.nvim_create_autocmd({'LspAttach'}, {
+    pattern = '*.py',
+    callback = on_attach
+  })
+
+  vim.api.nvim_create_autocmd({'LspDetach'}, {
+    pattern = '*.py',
+    callback = on_detach
+  })
+end
+
+return M
