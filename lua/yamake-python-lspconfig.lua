@@ -187,6 +187,22 @@ function M.setup()
     pattern = '*.py',
     callback = on_detach
   })
+
+  vim.api.nvim_create_user_command(
+    'GeneratePyrightconfig',
+    function()
+      local yamake_module = vim.fs.root(0, 'ya.make')
+      print('Generating pyrightconfig.json...')
+      generate_project(
+	yamake_module,
+	function(created_pyright_config)
+	  setup_lsp(created_pyright_config)
+	end
+      )
+    end,
+    {}
+  )
 end
+
 
 return M
