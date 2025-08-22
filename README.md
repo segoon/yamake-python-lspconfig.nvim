@@ -17,5 +17,15 @@ require('yamake-python-lspconfig').setup({
   autorestart_lsp = true,
   -- do not ask for "generate config?" if it is missing
   autogenerate_config = false,
+  -- root directory for dummy vscode ide project
+  ide_rootdir = os.getenv('HOME') .. '/.local/share/nvim/yamake-python-lspconfig',
 })
+```
+
+## Manual config file regeneration
+
+It is possible to regenerate `pyrightconfig.json` with the following command:
+
+```
+:GeneratePyrightconfig
 ```

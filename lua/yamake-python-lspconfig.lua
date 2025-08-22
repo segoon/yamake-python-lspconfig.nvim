@@ -2,6 +2,7 @@ local vim = vim
 
 local plugin_args = {}
 local wait_restart_clients = {}
+local plugin_root = os.getenv('HOME') .. '/.local/share/nvim/yamake-python-lspconfig'
 
 local function locate_pyright_config_json(yamake_module)
   local dir = vim.fs.root(yamake_module, 'pyrightconfig.json')
@@ -114,9 +115,8 @@ local function generate_project(yamake_module, callback)
     )
   end
 
-  -- TODO: generate in a unique subdirectory of plugin's directory
   vim.system(
-    {'ya', 'ide', 'vscode', '--py3', '-P', '~/ide'},
+    {'ya', 'ide', 'vscode', '--py3', '-P', plugin_args.ide_rootdir .. '/' .. yamake_module},
     {
       text = true,
       cwd = yamake_module,
@@ -192,12 +192,15 @@ end
 local M = {}
 
 function M.setup(args)
-  plugin_args = vim.deepcopy(args)
+  plugin_args = vim.deepcopy(args) or {}
   if plugin_args.autorestart_lsp == nil then
     plugin_args.autorestart_lsp = true
   end
   if plugin_args.autogenerate_config == nil then
     plugin_args.autogenerate_config = false
+  end
+  if plugin_args.ide_rootdir == nil then
+    plugin_args.ide_rootdir = plugin_root
   end
 
   vim.api.nvim_create_autocmd({'LspAttach'}, {
