@@ -19,6 +19,9 @@ require('yamake-python-lspconfig').setup({
   autogenerate_config = false,
   -- root directory for dummy vscode ide project
   ide_rootdir = os.getenv('HOME') .. '/.local/share/nvim/yamake-python-lspconfig',
+  -- if true, generate pyrightconfig.json file near ya.make
+  -- if false, generate it in `ide_rootdir` subdirectory
+  is_config_in_arcadia = false,
 })
 ```
 

@@ -5,6 +5,14 @@ local wait_restart_clients = {}
 local plugin_root = os.getenv('HOME') .. '/.local/share/nvim/yamake-python-lspconfig'
 
 local function locate_pyright_config_json(yamake_module)
+  if not plugin_args.is_config_in_arcadia then
+    local filename = plugin_args.ide_rootdir .. '/' .. yamake_module .. '/pyrightconfig.json'
+    if vim.uv.fs_stat(filename) then
+      return filename
+    end
+    return nil
+  end
+
   local dir = vim.fs.root(yamake_module, 'pyrightconfig.json')
   if dir then
     return dir .. '/pyrightconfig.json'
@@ -35,6 +43,18 @@ local function read_file(filename)
   local content = file:read('a')
   file:close()
   return content
+end
+
+local function copy_file(from, to)
+  local content = read_file(from)
+
+  local file = io.open(to, 'w')
+  if not file then
+    error('failed to open file "' .. to .. '" for writing')
+    return
+  end
+  file:write(content)
+  file:close()
 end
 
 local function setup_lsp(pyright_config)
@@ -106,8 +126,16 @@ local function generate_project(yamake_module, callback)
 
     -- TODO: signal
 
-    -- TODO: config: allow storing pyrightconfig.json in plugin's directory
-    local pyright_config = yamake_module .. '/pyrightconfig.json'
+    -- pyrightconfig.json is generated in Arcadia's yamake_module directory
+    -- move it to ideroot directory, if configured
+    if not plugin_args.is_config_in_arcadia then
+      copy_file(
+	yamake_module .. '/pyrightconfig.json',
+	plugin_args.ide_rootdir .. '/' .. yamake_module .. '/pyrightconfig.json'
+      )
+    end
+
+    local pyright_config = locate_pyright_config_json(yamake_module)
     vim.schedule(
       function()
 	callback(pyright_config)
@@ -201,6 +229,9 @@ function M.setup(args)
   end
   if plugin_args.ide_rootdir == nil then
     plugin_args.ide_rootdir = plugin_root
+  end
+  if plugin_args.is_config_in_arcadia == nil then
+    plugin_args.is_config_in_arcadia = false
   end
 
   vim.api.nvim_create_autocmd({'LspAttach'}, {
