@@ -124,7 +124,10 @@ local function generate_project(yamake_module, callback)
       return
     end
 
-    -- TODO: signal
+    if obj.signal ~= 0 then
+      error('"ya ide vscode" exited with signal ' .. obj.signal)
+      return
+    end
 
     -- pyrightconfig.json is generated in Arcadia's yamake_module directory
     -- move it to ideroot directory, if configured
