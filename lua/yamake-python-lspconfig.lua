@@ -156,6 +156,27 @@ local function generate_project(yamake_module, callback)
   )
 end
 
+local function before_init(params, _)
+  local yamake_module = vim.fs.root(0, 'ya.make')
+  if not yamake_module then
+    -- Not in Arcadia
+    return
+  end
+
+  local pyright_config = locate_pyright_config_json(yamake_module)
+  if not pyright_config then
+    -- No problem, will generate config in on_attach
+    return
+  end
+  local content = read_file(pyright_config)
+  local json = vim.fn.json_decode(content)
+  local extra_paths = json['extraPaths']
+
+  params['initializationOptions']['workspace'] = {
+      extraPaths = extra_paths
+  }
+end
+
 local function on_attach(_)
   local yamake_module = vim.fs.root(0, 'ya.make')
   if not yamake_module then
@@ -165,7 +186,7 @@ local function on_attach(_)
 
   local pyright_config = locate_pyright_config_json(yamake_module)
   if pyright_config then
-    setup_lsp(pyright_config)
+    -- Already started with proper config
     return
   else
     if plugin_args.autogenerate_config then
@@ -236,6 +257,11 @@ function M.setup(args)
   if plugin_args.is_config_in_arcadia == nil then
     plugin_args.is_config_in_arcadia = false
   end
+
+  vim.lsp.config('jedi_language_server', {
+    before_init = before_init,
+    init_options = {}
+  })
 
   vim.api.nvim_create_autocmd({'LspAttach'}, {
     pattern = '*.py',
