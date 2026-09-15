@@ -1,5 +1,11 @@
 # What's that?
 
+> [!WARNING]
+> This plugin is deprecated and is no longer maintained. Use
+> [arcadia-lspconfig.nvim](https://github.com/segoon/arcadia-lspconfig.nvim)
+> instead. It generates configuration and codegen outputs for Pyright and
+> BasedPyright while also managing the Arcadia-aware LSP integration.
+
 The nvim plugin to automatically generate valid jedi-language-server LSP configuration for ya.make build system. It honours `NAMESPACE` override in `PY_SRC`.
 
 # Quickstart 
